@@ -14,7 +14,7 @@ import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
-import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
@@ -112,7 +112,7 @@ public class JeiIntegration implements IModPlugin {
         }
 
         for (RecipeCategory recipeCategory : RecipeCategory.getRecipeCategories().values()) {
-            registration.addRecipes(RecipeType.create(SlimefunEssentials.MOD_ID, recipeCategory.id().toLowerCase(), SlimefunRecipe.class), recipeCategory.childRecipes());
+            registration.addRecipes(recipeType(recipeCategory), recipeCategory.childRecipes());
         }
     }
 
@@ -124,8 +124,12 @@ public class JeiIntegration implements IModPlugin {
         }
 
         for (RecipeCategory recipeCategory : RecipeCategory.getRecipeCategories().values()) {
-            registration.addRecipeCatalyst(recipeCategory.itemStack(), RecipeType.create(SlimefunEssentials.MOD_ID, recipeCategory.id().toLowerCase(), SlimefunRecipe.class));
+            registration.addCraftingStation(recipeType(recipeCategory), recipeCategory.itemStack());
         }
+    }
+
+    private static IRecipeType<SlimefunRecipe> recipeType(RecipeCategory recipeCategory) {
+        return IRecipeType.create(SlimefunEssentials.id(recipeCategory.id()), SlimefunRecipe.class);
     }
 
     @Override

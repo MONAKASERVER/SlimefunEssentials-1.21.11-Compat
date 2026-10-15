@@ -32,9 +32,6 @@
     "jade": [
       "me.justahuman.slimefun_essentials.compat.jade.JadeIntegration"
     ],
-    "emi": [
-      "me.justahuman.slimefun_essentials.compat.emi.EmiIntegration"
-    ],
     "jei_mod_plugin": [
       "me.justahuman.slimefun_essentials.compat.jei.JeiIntegration"
     ],

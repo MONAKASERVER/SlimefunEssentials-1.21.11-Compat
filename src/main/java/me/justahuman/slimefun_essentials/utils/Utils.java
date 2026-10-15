@@ -52,7 +52,7 @@ public class Utils {
             return null;
         }
         Optional<? extends NbtComponent> customData = components.get(DataComponentTypes.CUSTOM_DATA);
-        return customData != null ? customData.map(NbtComponent::getNbt).map(compound -> compound.getCompound("PublicBukkitValues")).orElse(null) : null;
+        return customData != null ? customData.map(NbtComponent::copyNbt).map(compound -> compound.getCompoundOrEmpty("PublicBukkitValues")).orElse(null) : null;
     }
 
     public static String getSlimefunId(@Nullable ItemStack itemStack) {
@@ -64,7 +64,7 @@ public class Utils {
         if (pluginNbt == null || !pluginNbt.contains("slimefun:slimefun_item")) {
             return null;
         }
-        return pluginNbt.getString("slimefun:slimefun_item");
+        return pluginNbt.getString("slimefun:slimefun_item").orElse(null);
     }
 
     public static String getGuideMode(@Nullable ItemStack itemStack) {
@@ -76,7 +76,7 @@ public class Utils {
         if (pluginNbt == null || !pluginNbt.contains("slimefun:slimefun_guide_mode")) {
             return null;
         }
-        return pluginNbt.getString("slimefun:slimefun_guide_mode");
+        return pluginNbt.getString("slimefun:slimefun_guide_mode").orElse(null);
     }
 
     public static String fillPlaceholders(String string, SlimefunRecipe recipe) {

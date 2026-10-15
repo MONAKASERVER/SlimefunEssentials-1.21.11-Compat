@@ -2,19 +2,17 @@ package me.justahuman.slimefun_essentials.api;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.justahuman.slimefun_essentials.SlimefunEssentials;
 import me.justahuman.slimefun_essentials.api.def.DrawMode;
 import me.justahuman.slimefun_essentials.client.component.BasicComponentType;
 import me.justahuman.slimefun_essentials.client.component.FillingComponentType;
 import me.justahuman.slimefun_essentials.client.SlimefunRecipe;
-import me.justahuman.slimefun_essentials.mixins.minecraft.DrawContextInvoker;
 import me.justahuman.slimefun_essentials.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.util.Identifier;
 
 import java.util.HashMap;
@@ -39,14 +37,12 @@ public interface DisplayComponentType {
     }
 
     default void draw(SlimefunRecipe recipe, DrawContext context, Identifier identifier, int x, int y, int width, int height, int u, int v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
-        RenderSystem.enableBlend();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        context.drawTexture(RenderLayer::getGuiTextured, identifier, x, y, u, v, width, height, regionWidth, regionHeight, textureWidth, textureHeight);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, identifier, x, y, u, v, width, height, regionWidth, regionHeight, textureWidth, textureHeight);
     }
 
     default void drawTooltip(DrawContext context, List<TooltipComponent> tooltip,  int x, int y, int mouseX, int mouseY, int width, int height) {
         if (!tooltip.isEmpty() && mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height) {
-            ((DrawContextInvoker) context).callDrawTooltip(MinecraftClient.getInstance().textRenderer, tooltip, x, y, HoveredTooltipPositioner.INSTANCE, null);
+            context.drawTooltipImmediately(MinecraftClient.getInstance().textRenderer, tooltip, x, y, HoveredTooltipPositioner.INSTANCE, null);
         }
     }
 

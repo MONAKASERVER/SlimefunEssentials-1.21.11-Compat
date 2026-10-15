@@ -5,15 +5,13 @@ import me.justahuman.slimefun_essentials.api.def.DrawMode;
 import me.justahuman.slimefun_essentials.client.RecipeCategory;
 import me.justahuman.slimefun_essentials.client.component.RecipeDisplayComponent;
 import me.justahuman.slimefun_essentials.client.SlimefunRecipe;
-import me.justahuman.slimefun_essentials.utils.TextureUtils;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.gui.drawable.IDrawableBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
-import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
@@ -23,25 +21,26 @@ public class SlimefunJeiCategory implements IRecipeCategory<SlimefunRecipe> {
     protected final IGuiHelper guiHelper;
     protected final RecipeCategory recipeCategory;
     protected IDrawable icon;
-    protected final IDrawable background;
+    protected final int width;
+    protected final int height;
 
     public SlimefunJeiCategory(IGuiHelper guiHelper, RecipeCategory recipeCategory) {
         this.guiHelper = guiHelper;
         this.recipeCategory = recipeCategory;
         this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, this.recipeCategory.itemStack());
-        IDrawableBuilder builder = guiHelper.drawableBuilder(TextureUtils.WIDGETS, 0, 0, 0, 0);
         int width = 0;
         int height = 0;
         for (SlimefunRecipe recipe : recipeCategory.childRecipes()) {
             width = Math.max(width, recipeCategory.display().width(recipe));
             height = Math.max(height, recipeCategory.display().height(recipe));
         }
-        this.background = builder.addPadding(height / 2, height / 2, width / 2, width / 2).build();
+        this.width = Math.max(1, width);
+        this.height = Math.max(1, height);
     }
 
     @Override
-    public @NotNull RecipeType<SlimefunRecipe> getRecipeType() {
-        return RecipeType.create(SlimefunEssentials.MOD_ID, this.recipeCategory.id().toLowerCase(), SlimefunRecipe.class);
+    public @NotNull IRecipeType<SlimefunRecipe> getRecipeType() {
+        return IRecipeType.create(SlimefunEssentials.id(this.recipeCategory.id()), SlimefunRecipe.class);
     }
 
     @Override
@@ -50,8 +49,13 @@ public class SlimefunJeiCategory implements IRecipeCategory<SlimefunRecipe> {
     }
 
     @Override
-    public @NotNull IDrawable getBackground() {
-        return this.background;
+    public int getWidth() {
+        return this.width;
+    }
+
+    @Override
+    public int getHeight() {
+        return this.height;
     }
 
     @Override
@@ -65,8 +69,8 @@ public class SlimefunJeiCategory implements IRecipeCategory<SlimefunRecipe> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, SlimefunRecipe recipe, IFocusGroup focuses) {
-        int xOffset = (this.background.getWidth() - recipeCategory.display().width(recipe)) / 2;
-        int yOffset = (this.background.getHeight() - recipeCategory.display().height(recipe)) / 2;
+        int xOffset = (this.width - recipeCategory.display().width(recipe)) / 2;
+        int yOffset = (this.height - recipeCategory.display().height(recipe)) / 2;
 
         for (RecipeDisplayComponent component : recipeCategory.display().components(recipe)) {
             if (component.type().equals("slot") || component.type().equals("large_slot")) {
@@ -88,8 +92,8 @@ public class SlimefunJeiCategory implements IRecipeCategory<SlimefunRecipe> {
 
     @Override
     public void draw(SlimefunRecipe recipe, IRecipeSlotsView recipeSlotsView, DrawContext graphics, double mouseX, double mouseY) {
-        int xOffset = (this.background.getWidth() - recipeCategory.display().width(recipe)) / 2;
-        int yOffset = (this.background.getHeight() - recipeCategory.display().height(recipe)) / 2;
+        int xOffset = (this.width - recipeCategory.display().width(recipe)) / 2;
+        int yOffset = (this.height - recipeCategory.display().height(recipe)) / 2;
 
         for (RecipeDisplayComponent component : recipeCategory.display().components(recipe)) {
             component.draw(recipe, DrawMode.LIGHT, graphics, component.x() + xOffset, component.y() + yOffset);

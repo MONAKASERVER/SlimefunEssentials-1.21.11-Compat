@@ -39,7 +39,7 @@ public class ReloadingScreen extends Screen {
         int n = height + 12 * 2;
         int o = this.isFocused() ? -1 : -6250336;
         graphics.fill(k + 1, l, k + m, l + n, -16777216);
-        graphics.drawBorder(k, l, m, n, o);
+        graphics.drawStrokedRectangle(k, l, m, n, o);
         graphics.drawCenteredTextWithShadow(this.textRenderer, title, this.width / 2, l + 12, 0xffffff);
         graphics.drawCenteredTextWithShadow(this.textRenderer, text, this.width / 2, l + 12 + 9, 0x808080);
     }

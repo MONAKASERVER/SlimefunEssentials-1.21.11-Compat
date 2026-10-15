@@ -11,9 +11,10 @@
   "slimefun_essentials.reloading": "Reloading...",
 
   "slimefun_essentials.key_bind.open_config": "Open Config",
+  "key.category.slimefun_essentials.controls": "Slimefun Essentials",
   "slimefun_essentials.config.category.general": "General",
   "slimefun_essentials.config.option.recipe_features": "Enable Recipe Features",
-  "slimefun_essentials.config.option.recipe_features.tooltip": "-> Enables Jei, Rei, & Emi compatibility",
+  "slimefun_essentials.config.option.recipe_features.tooltip": "-> Enables JEI and REI compatibility",
 
   "slimefun_essentials.config.category.visual": "Visual",
   "slimefun_essentials.config.option.replace_item_identifiers": "Replace Item Ids",

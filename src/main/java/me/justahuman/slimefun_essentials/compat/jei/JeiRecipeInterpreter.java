@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public class JeiRecipeInterpreter implements IdInterpreter<Object> {
     public void addIngredient(IRecipeSlotBuilder slotBuilder, ItemStack itemStack) {
-        slotBuilder.addItemStack(itemStack);
+        slotBuilder.add(itemStack);
     }
 
     public void addIngredients(IRecipeSlotBuilder slotBuilder, RecipeComponent component) {
@@ -33,11 +33,11 @@ public class JeiRecipeInterpreter implements IdInterpreter<Object> {
                 addIngredientObject(slotBuilder, object);
             }
         } else if (ingredient instanceof ItemStack itemStack) {
-            slotBuilder.addItemStack(itemStack);
+            slotBuilder.add(itemStack);
         } else if (ingredient instanceof SlimefunItemStack slimefunItemStack) {
-            slotBuilder.addItemStack(slimefunItemStack.itemStack());
+            slotBuilder.add(slimefunItemStack.itemStack());
         } else if (ingredient instanceof JeiFluidIngredient fluidStack) {
-            slotBuilder.addFluidStack(fluidStack.getFluidVariant().getFluid(), fluidStack.getAmount());
+            slotBuilder.add(fluidStack.getFluidVariant().getFluid(), fluidStack.getAmount());
         }
     }
 

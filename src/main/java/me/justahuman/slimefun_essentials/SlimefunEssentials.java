@@ -55,7 +55,8 @@ public class SlimefunEssentials implements ClientModInitializer {
         });
 
         if (CompatUtils.isClothConfigLoaded()) {
-            final KeyBinding keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding("slimefun_essentials.key_bind.open_config", GLFW.GLFW_KEY_F6, "slimefun_essentials.title"));
+            final KeyBinding.Category category = KeyBinding.Category.create(id("controls"));
+            final KeyBinding keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding("slimefun_essentials.key_bind.open_config", GLFW.GLFW_KEY_F6, category));
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
                 if (keyBinding.isPressed()) {
                     client.setScreen(ConfigScreen.buildScreen(client.currentScreen));

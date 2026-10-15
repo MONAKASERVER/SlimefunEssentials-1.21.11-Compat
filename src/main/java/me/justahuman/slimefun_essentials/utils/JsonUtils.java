@@ -95,7 +95,7 @@ public class JsonUtils {
         json.addProperty("item", Registries.ITEM.getId(itemStack.getItem()).toString());
         json.addProperty("amount", itemStack.getCount());
         if (changes != ComponentChanges.EMPTY) {
-            json.addProperty("components", ComponentChanges.CODEC.encodeStart(withRegistryAccess(NbtOps.INSTANCE), changes).getOrThrow().asString());
+            json.addProperty("components", ComponentChanges.CODEC.encodeStart(withRegistryAccess(NbtOps.INSTANCE), changes).getOrThrow().toString());
         }
         return json.toString();
     }
@@ -114,7 +114,7 @@ public class JsonUtils {
 
         try {
             if (itemStack.getComponents() instanceof MergedComponentMap components && json.get("components") instanceof JsonPrimitive primitive && primitive.isString()) {
-                components.setChanges(ComponentChanges.CODEC.decode(withRegistryAccess(NbtOps.INSTANCE), StringNbtReader.parse(primitive.getAsString())).getOrThrow().getFirst());
+                components.setChanges(ComponentChanges.CODEC.decode(withRegistryAccess(NbtOps.INSTANCE), StringNbtReader.fromOps(NbtOps.INSTANCE).read(primitive.getAsString())).getOrThrow().getFirst());
             }
         } catch (Exception e) {
             SlimefunEssentials.LOGGER.error("Failed to deserialize item components", e);

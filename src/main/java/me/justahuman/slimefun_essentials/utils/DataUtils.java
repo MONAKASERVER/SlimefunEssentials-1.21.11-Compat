@@ -24,7 +24,7 @@ public class DataUtils {
 
         try {
             if (input.readBoolean() && itemStack.getComponents() instanceof MergedComponentMap components) {
-                components.setChanges(ComponentChanges.CODEC.decode(withRegistryAccess(NbtOps.INSTANCE), StringNbtReader.parse(input.readUTF())).getOrThrow().getFirst());
+                components.setChanges(ComponentChanges.CODEC.decode(withRegistryAccess(NbtOps.INSTANCE), StringNbtReader.fromOps(NbtOps.INSTANCE).read(input.readUTF())).getOrThrow().getFirst());
             }
         } catch (Exception e) {
             SlimefunEssentials.LOGGER.error("Failed to deserialize item components", e);
