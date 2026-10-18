@@ -6,13 +6,12 @@ import me.justahuman.slimefun_essentials.client.RecipeComponent;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.fabric.ingredients.fluid.JeiFluidIngredient;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.TagKey;
-
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,7 +42,7 @@ public class JeiRecipeInterpreter implements IdInterpreter<Object> {
 
     @Override
     public Object fromTag(float chance, TagKey<Item> tagKey, int amount, Object def) {
-        Optional<RegistryEntryList.Named<Item>> optional = Registries.ITEM.getOptional(tagKey);
+        Optional<HolderSet.Named<Item>> optional = BuiltInRegistries.ITEM.get(tagKey);
         if (optional.isEmpty()) {
             return def;
         }

@@ -10,10 +10,10 @@ import dev.emi.emi.api.widget.WidgetHolder;
 import me.justahuman.slimefun_essentials.api.def.DrawMode;
 import me.justahuman.slimefun_essentials.client.RecipeCategory;
 import me.justahuman.slimefun_essentials.client.component.RecipeDisplayComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.resources.Identifier;
 import me.justahuman.slimefun_essentials.client.SlimefunRecipe;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -72,7 +72,7 @@ public class SlimefunEmiRecipe implements EmiRecipe {
 
             widgets.add(new Widget() {
                 private final Bounds bounds = new Bounds(x, y, component.width(), component.height());
-                private final List<TooltipComponent> tooltip = component.tooltip(DrawMode.LIGHT, recipe);
+                private final List<ClientTooltipComponent> tooltip = component.tooltip(DrawMode.LIGHT, recipe);
 
                 @Override
                 public Bounds getBounds() {
@@ -80,12 +80,12 @@ public class SlimefunEmiRecipe implements EmiRecipe {
                 }
 
                 @Override
-                public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+                public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
                     component.draw(recipe, DrawMode.LIGHT, context, bounds.x(), bounds.y());
                 }
 
                 @Override
-                public List<TooltipComponent> getTooltip(int mouseX, int mouseY) {
+                public List<ClientTooltipComponent> getTooltip(int mouseX, int mouseY) {
                     if (bounds.contains(mouseX, mouseY)) {
                         return tooltip;
                     }

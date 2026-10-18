@@ -3,7 +3,7 @@ package me.justahuman.slimefun_essentials.compat.jei;
 import me.justahuman.slimefun_essentials.utils.Utils;
 import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
 import mezz.jei.api.ingredients.subtypes.UidContext;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 public class SlimefunIdInterpreter implements ISubtypeInterpreter<ItemStack> {

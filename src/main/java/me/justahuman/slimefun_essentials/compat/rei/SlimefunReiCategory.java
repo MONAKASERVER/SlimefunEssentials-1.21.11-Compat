@@ -16,9 +16,9 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -45,8 +45,8 @@ public class SlimefunReiCategory implements DisplayCategory<SlimefunDisplay> {
     }
 
     @NotNull
-    public Text getTitle() {
-        return this.icon.getName();
+    public Component getTitle() {
+        return this.icon.getHoverName();
     }
 
     @NotNull
@@ -101,7 +101,7 @@ public class SlimefunReiCategory implements DisplayCategory<SlimefunDisplay> {
             int y = component.y() + yOffset;
             int width = component.width();
             int height = component.height();
-            List<TooltipComponent> tooltip = component.tooltip(mode, recipe);
+            List<ClientTooltipComponent> tooltip = component.tooltip(mode, recipe);
             widgets.add(Widgets.createDrawableWidget((context, mouseX, mouseY, delta) ->
                     component.drawTooltip(context, tooltip, x, y, mouseX, mouseY, width, height)));
         }

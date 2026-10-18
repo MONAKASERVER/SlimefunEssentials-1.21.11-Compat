@@ -3,9 +3,8 @@ package me.justahuman.slimefun_essentials.client.renderable;
 import me.justahuman.slimefun_essentials.api.CustomRenderable;
 import me.justahuman.slimefun_essentials.api.RecipeCondition;
 import me.justahuman.slimefun_essentials.client.SlimefunRecipe;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.resources.Identifier;
 import java.util.List;
 
 public class ConditionalRenderable implements CustomRenderable {
@@ -56,7 +55,7 @@ public class ConditionalRenderable implements CustomRenderable {
     }
 
     @Override
-    public List<TooltipComponent> tooltip() {
+    public List<ClientTooltipComponent> tooltip() {
         return passedCondition ? passed.tooltip() : failed.tooltip();
     }
 

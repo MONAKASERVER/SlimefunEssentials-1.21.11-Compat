@@ -7,18 +7,17 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.mojang.serialization.DynamicOps;
 import me.justahuman.slimefun_essentials.SlimefunEssentials;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.MergedComponentMap;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.PatchedDataComponentMap;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
-
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,14 +73,14 @@ public class JsonUtils {
         return parent.get(key) instanceof JsonPrimitive primitive && primitive.isNumber() ? primitive.getAsInt() : def;
     }
 
-    public static List<TooltipComponent> getTooltip(JsonObject json) {
+    public static List<ClientTooltipComponent> getTooltip(JsonObject json) {
         final JsonArray tooltipArray = get(json, "tooltip", new JsonArray());
         if (tooltipArray.isEmpty()) {
             return List.of();
         }
 
-        final List<TooltipComponent> tooltip = new ArrayList<>();
-        tooltipArray.forEach(element -> tooltip.add(TooltipComponent.of(Text.literal(element.getAsString()).asOrderedText())));
+        final List<ClientTooltipComponent> tooltip = new ArrayList<>();
+        tooltipArray.forEach(element -> tooltip.add(ClientTooltipComponent.create(Component.literal(element.getAsString()).getVisualOrderText())));
         return tooltip;
     }
 
@@ -91,11 +90,11 @@ public class JsonUtils {
 
     public static String serializeItem(ItemStack itemStack) {
         final JsonObject json = new JsonObject();
-        final ComponentChanges changes = itemStack.getComponentChanges();
-        json.addProperty("item", Registries.ITEM.getId(itemStack.getItem()).toString());
+        final DataComponentPatch changes = itemStack.getComponentsPatch();
+        json.addProperty("item", BuiltInRegistries.ITEM.getKey(itemStack.getItem()).toString());
         json.addProperty("amount", itemStack.getCount());
-        if (changes != ComponentChanges.EMPTY) {
-            json.addProperty("components", ComponentChanges.CODEC.encodeStart(withRegistryAccess(NbtOps.INSTANCE), changes).getOrThrow().toString());
+        if (changes != DataComponentPatch.EMPTY) {
+            json.addProperty("components", DataComponentPatch.CODEC.encodeStart(withRegistryAccess(NbtOps.INSTANCE), changes).getOrThrow().toString());
         }
         return json.toString();
     }
@@ -109,12 +108,12 @@ public class JsonUtils {
             return ItemStack.EMPTY;
         }
 
-        final ItemStack itemStack = new ItemStack(Registries.ITEM.get(Identifier.tryParse(json.get("id").getAsString())));
-        itemStack.setCount(JsonHelper.getInt(json, "amount", 1));
+        final ItemStack itemStack = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.tryParse(json.get("id").getAsString())));
+        itemStack.setCount(GsonHelper.getAsInt(json, "amount", 1));
 
         try {
-            if (itemStack.getComponents() instanceof MergedComponentMap components && json.get("components") instanceof JsonPrimitive primitive && primitive.isString()) {
-                components.setChanges(ComponentChanges.CODEC.decode(withRegistryAccess(NbtOps.INSTANCE), StringNbtReader.fromOps(NbtOps.INSTANCE).read(primitive.getAsString())).getOrThrow().getFirst());
+            if (itemStack.getComponents() instanceof PatchedDataComponentMap components && json.get("components") instanceof JsonPrimitive primitive && primitive.isString()) {
+                components.restorePatch(DataComponentPatch.CODEC.decode(withRegistryAccess(NbtOps.INSTANCE), TagParser.create(NbtOps.INSTANCE).parseFully(primitive.getAsString())).getOrThrow().getFirst());
             }
         } catch (Exception e) {
             SlimefunEssentials.LOGGER.error("Failed to deserialize item components", e);
@@ -123,10 +122,10 @@ public class JsonUtils {
     }
 
     private static <T> DynamicOps<T> withRegistryAccess(DynamicOps<T> ops) {
-        MinecraftClient instance = MinecraftClient.getInstance();
-        if (instance == null || instance.world == null) {
+        Minecraft instance = Minecraft.getInstance();
+        if (instance == null || instance.level == null) {
             return ops;
         }
-        return instance.world.getRegistryManager().getOps(ops);
+        return instance.level.registryAccess().createSerializationContext(ops);
     }
 }

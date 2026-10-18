@@ -8,8 +8,7 @@ import com.google.gson.JsonPrimitive;
 import me.justahuman.slimefun_essentials.api.DisplayComponentType;
 import me.justahuman.slimefun_essentials.utils.DataUtils;
 import me.justahuman.slimefun_essentials.utils.JsonUtils;
-import net.minecraft.item.ItemStack;
-
+import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,24 +17,30 @@ public class SlimefunRecipe {
     protected Integer sfTicks;
     protected Integer ticks;
     protected Integer energy;
+    protected Integer width;
+    protected Integer height;
     protected List<RecipeComponent> inputs;
     protected List<RecipeComponent> outputs;
     protected List<String> labels;
 
-    public SlimefunRecipe(RecipeCategory parent, Integer sfTicks, Integer ticks, Integer energy, List<RecipeComponent> inputs, List<RecipeComponent> outputs, List<String> labels) {
+    public SlimefunRecipe(RecipeCategory parent, Integer sfTicks, Integer ticks, Integer energy, Integer width, Integer height, List<RecipeComponent> inputs, List<RecipeComponent> outputs, List<String> labels) {
         this.parent = parent;
         this.sfTicks = sfTicks;
         this.ticks = ticks;
         this.energy = energy;
+        this.width = width;
+        this.height = height;
         this.inputs = inputs;
         this.outputs = outputs;
         this.labels = labels;
     }
 
-    public static SlimefunRecipe deserialize(RecipeCategory parent, ByteArrayDataInput input, Integer workstationEnergy) {
+    public static SlimefunRecipe deserialize(RecipeCategory parent, ByteArrayDataInput input, Integer workstationEnergy, int dataVersion) {
         final Integer sfTicks = DataUtils.get(input, (Integer) null);
         final Integer ticks = DataUtils.get(input, (Integer) null);
         final Integer energy = DataUtils.get(input, workstationEnergy);
+        final Integer width = dataVersion >= 2 ? DataUtils.get(input, (Integer) null) : null;
+        final Integer height = dataVersion >= 2 ? DataUtils.get(input, (Integer) null) : null;
         final List<RecipeComponent> inputs = new ArrayList<>();
         final List<RecipeComponent> outputs = new ArrayList<>();
         final List<String> labels = new ArrayList<>();
@@ -64,13 +69,15 @@ public class SlimefunRecipe {
             }
         }
 
-        return new SlimefunRecipe(parent, sfTicks, ticks, energy, inputs, outputs, labels);
+        return new SlimefunRecipe(parent, sfTicks, ticks, energy, width, height, inputs, outputs, labels);
     }
 
     public static SlimefunRecipe deserialize(RecipeCategory parent, JsonObject recipeObject, Integer workstationEnergy) {
         final Integer sfTicks = JsonUtils.get(recipeObject, "sf_ticks", (Integer) null);
         final Integer ticks = JsonUtils.get(recipeObject, "ticks", (Integer) null);
         final Integer energy = JsonUtils.get(recipeObject, "energy", workstationEnergy);
+        final Integer width = JsonUtils.get(recipeObject, "width", (Integer) null);
+        final Integer height = JsonUtils.get(recipeObject, "height", (Integer) null);
         final List<RecipeComponent> inputs = new ArrayList<>();
         final List<RecipeComponent> outputs = new ArrayList<>();
         final List<String> labels = new ArrayList<>();
@@ -107,7 +114,7 @@ public class SlimefunRecipe {
             }
         }
 
-        return new SlimefunRecipe(parent, sfTicks, ticks, energy, inputs, outputs, labels);
+        return new SlimefunRecipe(parent, sfTicks, ticks, energy, width, height, inputs, outputs, labels);
     }
 
     public boolean hasLabels() {
@@ -173,6 +180,14 @@ public class SlimefunRecipe {
         return hasTime() ? this.energy * sfTicks() : this.energy;
     }
 
+    public Integer width() {
+        return width;
+    }
+
+    public Integer height() {
+        return height;
+    }
+
     public List<RecipeComponent> inputs() {
         return this.inputs;
     }
@@ -186,6 +201,6 @@ public class SlimefunRecipe {
     }
 
     public SlimefunRecipe copy(RecipeCategory newParent) {
-        return new SlimefunRecipe(newParent, this.sfTicks, this.ticks, this.energy, new ArrayList<>(this.inputs), new ArrayList<>(this.outputs), new ArrayList<>(this.labels));
+        return new SlimefunRecipe(newParent, this.sfTicks, this.ticks, this.energy, this.width, this.height, new ArrayList<>(this.inputs), new ArrayList<>(this.outputs), new ArrayList<>(this.labels));
     }
 }

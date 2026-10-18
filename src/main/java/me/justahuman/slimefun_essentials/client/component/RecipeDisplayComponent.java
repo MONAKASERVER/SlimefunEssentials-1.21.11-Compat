@@ -9,9 +9,8 @@ import me.justahuman.slimefun_essentials.client.SlimefunRecipe;
 import me.justahuman.slimefun_essentials.utils.DataUtils;
 import me.justahuman.slimefun_essentials.utils.JsonUtils;
 import me.justahuman.slimefun_essentials.utils.Utils;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,10 +21,10 @@ public record RecipeDisplayComponent(
         int index,
         boolean output,
         CustomRenderable renderable,
-        List<TooltipComponent> tooltipOverride,
-        Map<SlimefunRecipe, List<TooltipComponent>> tooltipCache
+        List<ClientTooltipComponent> tooltipOverride,
+        Map<SlimefunRecipe, List<ClientTooltipComponent>> tooltipCache
 ) implements DisplayComponentType {
-    public static final List<TooltipComponent> EMPTY_TOOLTIP = List.of();
+    public static final List<ClientTooltipComponent> EMPTY_TOOLTIP = List.of();
 
     public RecipeDisplayComponent(String type, int x, int y) {
         this(type, x, y, -1, false, null, EMPTY_TOOLTIP, new HashMap<>());
@@ -50,7 +49,7 @@ public record RecipeDisplayComponent(
     }
 
     @Override
-    public void draw(SlimefunRecipe recipe, DrawMode mode, DrawContext context, int x, int y) {
+    public void draw(SlimefunRecipe recipe, DrawMode mode, GuiGraphicsExtractor context, int x, int y) {
         if (this.renderable != null) {
             getType().draw(recipe, this.renderable, context, x, y);
         } else {
@@ -59,7 +58,7 @@ public record RecipeDisplayComponent(
     }
 
     @Override
-    public List<TooltipComponent> tooltip(DrawMode drawMode, SlimefunRecipe recipe) {
+    public List<ClientTooltipComponent> tooltip(DrawMode drawMode, SlimefunRecipe recipe) {
         return tooltipCache.computeIfAbsent(recipe, key -> {
             if (this.tooltipOverride.isEmpty()) {
                 return getType().tooltip(drawMode, recipe);
@@ -82,7 +81,7 @@ public record RecipeDisplayComponent(
         if (input.readBoolean()) {
             renderable = CustomRenderable.deserialize(input);
         }
-        List<TooltipComponent> tooltipOverride = DataUtils.getTooltip(input);
+        List<ClientTooltipComponent> tooltipOverride = DataUtils.getTooltip(input);
         return new RecipeDisplayComponent(type, x, y, index, output, renderable, tooltipOverride, new HashMap<>());
     }
 
@@ -96,7 +95,7 @@ public record RecipeDisplayComponent(
         if (jsonObject.has("renderable")) {
             renderable = CustomRenderable.deserialize(jsonObject.getAsJsonObject("renderable"));
         }
-        List<TooltipComponent> tooltip = JsonUtils.getTooltip(jsonObject);
+        List<ClientTooltipComponent> tooltip = JsonUtils.getTooltip(jsonObject);
         return new RecipeDisplayComponent(type, x, y, index, output, renderable, tooltip, new HashMap<>());
     }
 }
