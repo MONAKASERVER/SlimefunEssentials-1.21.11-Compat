@@ -58,7 +58,7 @@ public class Payloads {
     private static final int V2_MAGIC = 0x4D534532;
     private static final short V2_PROTOCOL = 2;
     private static final byte FLAG_GZIP = 1;
-    private static final String CHUNK_MARKER = "__mona_sync_chunk__";
+    private static final String CHUNK_MARKER = "__mona_sync_chunk__:";
     private static final int HASH_SIZE = 32;
     private static final int V2_HEADER_SIZE = Integer.BYTES + Short.BYTES + Byte.BYTES + Integer.BYTES * 5 + HASH_SIZE;
     private static final int MAX_UNCOMPRESSED_BYTES = 67_108_864;
@@ -184,7 +184,14 @@ public class Payloads {
     }
 
     public static void accept(SplitPayload payload) {
-        if (payload.data() == null && !CHUNK_MARKER.equals(payload.hash())) {
+        String transportHash = payload.hash() == null ? "" : payload.hash();
+        boolean partialChunk = transportHash.startsWith(CHUNK_MARKER);
+        String contentHash = partialChunk ? transportHash.substring(CHUNK_MARKER.length()) : transportHash;
+        if (payload.data() == null && !partialChunk) {
+            return;
+        }
+        if (!contentHash.isBlank()
+                && CACHED_HASHES.getOrDefault(payload.getClass(), Set.of()).contains(contentHash)) {
             return;
         }
         PACKET_COUNTS.merge(payload.getClass(), 1, Integer::sum);
@@ -205,6 +212,9 @@ public class Payloads {
 
     public static void checkMetExpected() {
         showToast(RECEIVING_TOAST_TYPE).run();
+        if (metExpected) {
+            return;
+        }
         for (Map.Entry<Class<?>, Integer> expected : EXPECTED_PACKETS.entrySet()) {
             if (PACKET_COUNTS.getOrDefault(expected.getKey(), 0) < expected.getValue()) {
                 return;
@@ -278,10 +288,6 @@ public class Payloads {
                 if (received.size() >= MAX_IN_FLIGHT_MESSAGES && !received.containsKey(id)) {
                     throw new IllegalArgumentException("too many in-flight messages");
                 }
-                if (CACHED_HASHES.getOrDefault(empty.getClass(), Set.of()).contains(hashString)) {
-                    return empty;
-                }
-
                 Assembly assembly = received.computeIfAbsent(id,
                         ignored -> new Assembly(flags, pieces, rawLength, encodedLength, expectedHash));
                 if (!assembly.matches(flags, pieces, rawLength, encodedLength, expectedHash)) {
@@ -290,7 +296,7 @@ public class Payloads {
                 }
                 assembly.put(piece, Arrays.copyOfRange(bytes, V2_HEADER_SIZE, bytes.length));
                 if (!assembly.complete()) {
-                    return factory.apply(null, CHUNK_MARKER);
+                    return factory.apply(null, CHUNK_MARKER + hashString);
                 }
 
                 received.remove(id);
