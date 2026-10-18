@@ -1,7 +1,7 @@
 package me.justahuman.slimefun_essentials.utils;
 
 import me.justahuman.slimefun_essentials.SlimefunEssentials;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public class TextureUtils {
     public static final int PADDING = 4;

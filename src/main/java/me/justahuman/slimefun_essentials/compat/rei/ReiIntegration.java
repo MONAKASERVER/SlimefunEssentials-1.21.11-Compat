@@ -15,9 +15,8 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.item.ItemStack;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.item.ItemStack;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ReiIntegration implements REIClientPlugin {
@@ -82,7 +81,7 @@ public class ReiIntegration implements REIClientPlugin {
     }
 
     private static void reload() {
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
         client.execute(() -> {
             AtomicBoolean started = new AtomicBoolean(false);
             client.setScreen(new ReloadingScreen(

@@ -3,12 +3,12 @@
   "id": "${mod_id}",
   "version": "${version}",
   "name": "${mod_name}",
-  "description": "A Minecraft mod bringing new features and compatibility with the Slimefun4 Plugin!\nSupported Addons: Slimefun",
-  "authors": [ "JustAHuman_xD" ],
+  "description": "Synchronizes Slimefun4 and addon recipes from MonaSlimefunServerEssentials into client-side JEI/REI.",
+  "authors": [ "JustAHuman_xD", "MONAKA SERVER" ],
   "contact": {
     "homepage": "https://modrinth.com/mod/slimefun-essentials",
-    "sources": "https://github.com/JustAHuman-xD/SlimefunEssentials",
-    "issues": "https://github.com/JustAHuman-xD/SlimefunEssentials/issues",
+    "sources": "https://github.com/MONAKASERVER/SlimefunEssentials-1.21.11-Compat",
+    "issues": "https://github.com/MONAKASERVER/SlimefunEssentials-1.21.11-Compat/issues",
     "discord": "https://discord.gg/y6fV6pbgHB"
   },
   "custom": {
@@ -47,7 +47,8 @@
   ],
   "depends": {
     "fabricloader": ">=${loader_version}",
-    "fabric": "*",
-    "minecraft": "${minecraft_version_range}"
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version_range}",
+    "java": ">=25"
   }
 }

@@ -9,8 +9,7 @@ import me.justahuman.slimefun_essentials.SlimefunEssentials;
 import me.justahuman.slimefun_essentials.api.RecipeDisplay;
 import me.justahuman.slimefun_essentials.utils.DataUtils;
 import me.justahuman.slimefun_essentials.utils.JsonUtils;
-import net.minecraft.item.ItemStack;
-
+import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,7 +67,7 @@ public class RecipeCategory {
         return this.childRecipes;
     }
 
-    public static void deserialize(ByteArrayDataInput input) {
+    public static void deserialize(ByteArrayDataInput input, int dataVersion) {
         final String id = input.readUTF();
         try {
             final String display = DataUtils.get(input, "dynamic");
@@ -80,7 +79,7 @@ public class RecipeCategory {
             final RecipeCategory category = new RecipeCategory(id, itemStack, display, speed, energy, recipes);
             int size = input.readInt();
             for (int i = 0; i < size; i++) {
-                recipes.add(SlimefunRecipe.deserialize(category, input, energy));
+                recipes.add(SlimefunRecipe.deserialize(category, input, energy, dataVersion));
             }
 
             TO_COPY.put(id, DataUtils.get(input, ""));

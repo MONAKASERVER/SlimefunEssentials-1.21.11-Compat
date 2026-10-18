@@ -4,12 +4,12 @@ import me.justahuman.slimefun_essentials.SlimefunEssentials;
 import me.justahuman.slimefun_essentials.client.SlimefunRegistry;
 import me.justahuman.slimefun_essentials.client.RecipeComponent;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public interface IdInterpreter<T> {
@@ -50,7 +50,7 @@ public interface IdInterpreter<T> {
         if (SlimefunRegistry.hasItem(type)) {
             final ItemStack itemStack = SlimefunRegistry.getItemStack(type).copy();
             if (damage > 0) {
-                itemStack.setDamage(damage);
+                itemStack.setDamageValue(damage);
             }
             return fromItemStack(chance, itemStack, amount, def);
         }
@@ -66,20 +66,20 @@ public interface IdInterpreter<T> {
         else if (type.startsWith("@")) {
             final boolean baby = type.startsWith("baby_", 1);
             final Identifier identifier = Identifier.tryParse("minecraft:" + type.substring(baby ? 6 : 1));
-            if (identifier == null || !Registries.ENTITY_TYPE.containsId(identifier)) {
+            if (identifier == null || !BuiltInRegistries.ENTITY_TYPE.containsKey(identifier)) {
                 SlimefunEssentials.LOGGER.error("Invalid Ingredient Entity Id: {}", id);
                 return def;
             }
-            return fromEntityType(chance, Registries.ENTITY_TYPE.get(identifier), baby, amount, def);
+            return fromEntityType(chance, BuiltInRegistries.ENTITY_TYPE.getValue(identifier), baby, amount, def);
         }
         // Fluid
         else if (type.startsWith("~")) {
             final Identifier identifier = Identifier.tryParse("minecraft:" + type.substring(1));
-            if (identifier == null || !Registries.FLUID.containsId(identifier)) {
+            if (identifier == null || !BuiltInRegistries.FLUID.containsKey(identifier)) {
                 SlimefunEssentials.LOGGER.error("Invalid Ingredient Fluid Id: {}", id);
                 return def;
             }
-            return fromFluid(chance, FluidVariant.of(Registries.FLUID.get(identifier)), amount, def);
+            return fromFluid(chance, FluidVariant.of(BuiltInRegistries.FLUID.getValue(identifier)), amount, def);
         }
         // Tag
         else if (type.startsWith("#")) {
@@ -88,7 +88,7 @@ public interface IdInterpreter<T> {
                 SlimefunEssentials.LOGGER.error("Invalid Ingredient Tag Id: {}", id);
                 return def;
             }
-            return fromTag(chance, TagKey.of(Registries.ITEM.getKey(), identifier), amount, def);
+            return fromTag(chance, TagKey.create(BuiltInRegistries.ITEM.key(), identifier), amount, def);
         }
         // Experience
         else if (type.equals("$")) {
@@ -97,14 +97,14 @@ public interface IdInterpreter<T> {
         // Item (Or Mistake)
         else {
             final Identifier identifier = Identifier.tryParse("minecraft:" + type.toLowerCase());
-            if (identifier == null || !Registries.ITEM.containsId(identifier)) {
+            if (identifier == null || !BuiltInRegistries.ITEM.containsKey(identifier)) {
                 SlimefunEssentials.LOGGER.error("Invalid Ingredient Item Id: {}", id);
                 return def;
             }
 
-            final ItemStack itemStack = Registries.ITEM.get(identifier).getDefaultStack().copy();
+            final ItemStack itemStack = BuiltInRegistries.ITEM.getValue(identifier).getDefaultInstance().copy();
             if (damage > 0) {
-                itemStack.setDamage(damage);
+                itemStack.setDamageValue(damage);
             }
             return fromItemStack(chance, itemStack, amount, def);
         }

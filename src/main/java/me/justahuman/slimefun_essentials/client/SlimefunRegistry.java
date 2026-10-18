@@ -10,13 +10,12 @@ import lombok.NonNull;
 import lombok.Setter;
 import me.justahuman.slimefun_essentials.SlimefunEssentials;
 import me.justahuman.slimefun_essentials.utils.Utils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.item.ItemStack;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.VanillaResourcePackProvider;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.repository.BuiltInPackSource;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.item.ItemStack;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -50,7 +49,7 @@ public class SlimefunRegistry {
 
     public static JsonObject jsonObjectFromResource(Resource resource) {
         try {
-            final InputStream inputStream = resource.getInputStream();
+            final InputStream inputStream = resource.open();
             return GSON.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), JsonObject.class);
         } catch(IOException e) {
             SlimefunEssentials.LOGGER.error("Failed to load resource", e);
@@ -66,15 +65,15 @@ public class SlimefunRegistry {
     }
 
     public static void loadItemModels() {
-        ResourceManager manager = MinecraftClient.getInstance().getResourceManager();
+        ResourceManager manager = Minecraft.getInstance().getResourceManager();
         loadCustomModels(manager, "item");
         loadCustomModels(manager, "block");
     }
 
     public static void loadCustomModels(ResourceManager manager, String directory) {
-        for (Map.Entry<Identifier, Resource> entry : manager.findResources("models/" + directory, Utils::filterVanillaItems).entrySet()) {
+        for (Map.Entry<Identifier, Resource> entry : manager.listResources("models/" + directory, Utils::filterVanillaItems).entrySet()) {
             final Resource resource = entry.getValue();
-            if (VanillaResourcePackProvider.VANILLA_KEY.equals(resource.getPackId())) {
+            if (BuiltInPackSource.VANILLA_ID.equals(resource.sourcePackId())) {
                 continue;
             }
 

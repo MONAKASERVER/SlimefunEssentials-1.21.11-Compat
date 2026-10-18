@@ -1,0 +1,24 @@
+{
+  "slimefun_essentials.title": "Mona Slimefun Essentials",
+
+  "slimefun_essentials.toast.receiving_expected_packets": "Slimefunレシピを同期中",
+  "slimefun_essentials.toast.receiving_expected_packets.description": "%s/%s, %s/%s, %s/%s, %s/%s",
+  "slimefun_essentials.toast.received_expected_packets": "Slimefunレシピの同期完了",
+  "slimefun_essentials.toast.received_expected_packets.description": "レシピビューアーを再読み込みしています…",
+  "slimefun_essentials.toast.received_unexpected_packets": "不正な同期データを受信しました",
+  "slimefun_essentials.toast.received_unexpected_packets.description": "安全のためSlimefunレシピを読み込みません。",
+
+  "slimefun_essentials.reloading": "再読み込み中…",
+
+  "slimefun_essentials.key_bind.open_config": "設定を開く",
+  "key.category.slimefun_essentials.controls": "Mona Slimefun Essentials",
+  "slimefun_essentials.config.category.general": "一般",
+  "slimefun_essentials.config.option.recipe_features": "レシピ連携を有効化",
+  "slimefun_essentials.config.option.recipe_features.tooltip": "JEI・REIとのSlimefunレシピ連携を有効にします",
+
+  "slimefun_essentials.config.category.visual": "表示",
+  "slimefun_essentials.config.option.replace_item_identifiers": "アイテムIDを置換",
+  "slimefun_essentials.config.option.replace_item_identifiers.tooltip": "例: minecraft:gunpowder → slimefun:pure_ore_cluster",
+  "slimefun_essentials.config.option.hide_background_tooltips": "背景アイテムの説明を隠す",
+  "slimefun_essentials.config.option.hide_background_tooltips.tooltip": "Slimefunガイドの灰色ガラス板など、背景・装飾用アイテムの説明を隠します"
+}

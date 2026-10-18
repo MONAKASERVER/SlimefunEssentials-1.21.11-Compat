@@ -6,9 +6,8 @@ import me.justahuman.slimefun_essentials.api.CustomRenderable;
 import me.justahuman.slimefun_essentials.utils.DataUtils;
 import me.justahuman.slimefun_essentials.utils.JsonUtils;
 import me.justahuman.slimefun_essentials.utils.TextureUtils;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.resources.Identifier;
 import java.util.List;
 
 public record SimpleRenderable(
@@ -16,7 +15,7 @@ public record SimpleRenderable(
         int width, int height,
         int u, int v,
         int textureWidth, int textureHeight,
-        List<TooltipComponent> tooltip
+        List<ClientTooltipComponent> tooltip
 ) implements CustomRenderable {
     public static SimpleRenderable deserialize(ByteArrayDataInput input) {
         return new SimpleRenderable(

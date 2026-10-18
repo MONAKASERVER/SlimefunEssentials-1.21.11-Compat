@@ -6,9 +6,8 @@ import me.justahuman.slimefun_essentials.api.RecipeCondition;
 import me.justahuman.slimefun_essentials.api.def.DrawMode;
 import me.justahuman.slimefun_essentials.client.SlimefunRecipe;
 import me.justahuman.slimefun_essentials.utils.Utils;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import java.util.List;
 import java.util.function.Function;
 
@@ -34,7 +33,7 @@ public record FillingComponentType(
     }
 
     @Override
-    public List<TooltipComponent> tooltip(DrawMode drawMode, SlimefunRecipe recipe) {
+    public List<ClientTooltipComponent> tooltip(DrawMode drawMode, SlimefunRecipe recipe) {
         CustomRenderable base = drawMode == DrawMode.LIGHT ? light : dark;
         CustomRenderable fill = drawMode == DrawMode.LIGHT ? lightFill : darkFill;
         fill.update(recipe);
@@ -42,7 +41,7 @@ public record FillingComponentType(
     }
 
     @Override
-    public void draw(SlimefunRecipe recipe, DrawMode mode, DrawContext context, int x, int y) {
+    public void draw(SlimefunRecipe recipe, DrawMode mode, GuiGraphicsExtractor context, int x, int y) {
         int time = this.timeToFill.apply(recipe);
         int subTime = time <= 0 ? 0 : (int) (System.currentTimeMillis() % time);
         boolean emptyToFull = this.emptyToFull.passes(recipe);

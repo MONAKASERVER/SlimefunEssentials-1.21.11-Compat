@@ -8,13 +8,12 @@ import me.justahuman.slimefun_essentials.client.component.BasicComponentType;
 import me.justahuman.slimefun_essentials.client.component.FillingComponentType;
 import me.justahuman.slimefun_essentials.client.SlimefunRecipe;
 import me.justahuman.slimefun_essentials.utils.Utils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,24 +24,24 @@ public interface DisplayComponentType {
     String type();
     int width();
     int height();
-    List<TooltipComponent> tooltip(DrawMode drawMode, SlimefunRecipe recipe);
+    List<ClientTooltipComponent> tooltip(DrawMode drawMode, SlimefunRecipe recipe);
 
-    void draw(SlimefunRecipe recipe, DrawMode mode, DrawContext context, int x, int y);
+    void draw(SlimefunRecipe recipe, DrawMode mode, GuiGraphicsExtractor context, int x, int y);
 
-    default void draw(SlimefunRecipe recipe, CustomRenderable renderable, DrawContext context, int x, int y) {
+    default void draw(SlimefunRecipe recipe, CustomRenderable renderable, GuiGraphicsExtractor context, int x, int y) {
         renderable.update(recipe);
         if (renderable.canRender()) {
             draw(recipe, context, renderable.identifier(), x, y, renderable.width(), renderable.height(), renderable.u(), renderable.v(), renderable.width(), renderable.height(), renderable.textureWidth(), renderable.textureHeight());
         }
     }
 
-    default void draw(SlimefunRecipe recipe, DrawContext context, Identifier identifier, int x, int y, int width, int height, int u, int v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, identifier, x, y, u, v, width, height, regionWidth, regionHeight, textureWidth, textureHeight);
+    default void draw(SlimefunRecipe recipe, GuiGraphicsExtractor context, Identifier identifier, int x, int y, int width, int height, int u, int v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
+        context.blit(RenderPipelines.GUI_TEXTURED, identifier, x, y, u, v, width, height, regionWidth, regionHeight, textureWidth, textureHeight);
     }
 
-    default void drawTooltip(DrawContext context, List<TooltipComponent> tooltip,  int x, int y, int mouseX, int mouseY, int width, int height) {
+    default void drawTooltip(GuiGraphicsExtractor context, List<ClientTooltipComponent> tooltip,  int x, int y, int mouseX, int mouseY, int width, int height) {
         if (!tooltip.isEmpty() && mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height) {
-            context.drawTooltipImmediately(MinecraftClient.getInstance().textRenderer, tooltip, x, y, HoveredTooltipPositioner.INSTANCE, null);
+            context.tooltip(Minecraft.getInstance().font, tooltip, x, y, DefaultTooltipPositioner.INSTANCE, null);
         }
     }
 

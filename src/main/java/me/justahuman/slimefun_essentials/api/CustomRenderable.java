@@ -5,10 +5,9 @@ import com.google.gson.JsonObject;
 import me.justahuman.slimefun_essentials.client.renderable.ConditionalRenderable;
 import me.justahuman.slimefun_essentials.client.renderable.OptionalRenderable;
 import me.justahuman.slimefun_essentials.client.renderable.SimpleRenderable;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.resources.Identifier;
 import me.justahuman.slimefun_essentials.client.SlimefunRecipe;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.util.Identifier;
-
 import java.util.List;
 
 public interface CustomRenderable {
@@ -19,7 +18,7 @@ public interface CustomRenderable {
     int v();
     int textureWidth();
     int textureHeight();
-    List<TooltipComponent> tooltip();
+    List<ClientTooltipComponent> tooltip();
 
     default void update(SlimefunRecipe recipe) {}
     default boolean canRender() {

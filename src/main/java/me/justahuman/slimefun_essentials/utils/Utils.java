@@ -3,20 +3,18 @@ package me.justahuman.slimefun_essentials.utils;
 import me.justahuman.slimefun_essentials.client.SlimefunRecipe;
 import me.justahuman.slimefun_essentials.client.SlimefunRegistry;
 import me.justahuman.slimefun_essentials.mixins.minecraft.TextTooltipAccessor;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,24 +41,16 @@ public class Utils {
         return path.substring(path.lastIndexOf("/") + 1, path.indexOf(".json"));
     }
 
-    public static NbtCompound getPluginNbt(@Nullable ItemStack itemStack) {
-        return itemStack == null ? null : getPluginNbt(itemStack.getComponentChanges());
-    }
-
-    public static NbtCompound getPluginNbt(@Nullable ComponentChanges components) {
-        if (components == null || components.isEmpty()) {
+    public static CompoundTag getPluginNbt(@Nullable ItemStack itemStack) {
+        if (itemStack == null || itemStack.isEmpty()) {
             return null;
         }
-        Optional<? extends NbtComponent> customData = components.get(DataComponentTypes.CUSTOM_DATA);
-        return customData != null ? customData.map(NbtComponent::copyNbt).map(compound -> compound.getCompoundOrEmpty("PublicBukkitValues")).orElse(null) : null;
+        CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
+        return customData == null ? null : customData.copyTag().getCompoundOrEmpty("PublicBukkitValues");
     }
 
     public static String getSlimefunId(@Nullable ItemStack itemStack) {
-        return itemStack == null ? null : getSlimefunId(itemStack.getComponentChanges());
-    }
-
-    public static String getSlimefunId(@Nullable ComponentChanges components) {
-        final NbtCompound pluginNbt = getPluginNbt(components);
+        final CompoundTag pluginNbt = getPluginNbt(itemStack);
         if (pluginNbt == null || !pluginNbt.contains("slimefun:slimefun_item")) {
             return null;
         }
@@ -68,11 +58,7 @@ public class Utils {
     }
 
     public static String getGuideMode(@Nullable ItemStack itemStack) {
-        return itemStack == null ? null : getGuideMode(itemStack.getComponentChanges());
-    }
-
-    public static String getGuideMode(@Nullable ComponentChanges components) {
-        final NbtCompound pluginNbt = getPluginNbt(components);
+        final CompoundTag pluginNbt = getPluginNbt(itemStack);
         if (pluginNbt == null || !pluginNbt.contains("slimefun:slimefun_guide_mode")) {
             return null;
         }
@@ -120,18 +106,18 @@ public class Utils {
         return number == null ? defaultValue : number;
     }
 
-    public static List<TooltipComponent> updateTooltip(List<TooltipComponent> tooltip, SlimefunRecipe recipe) {
+    public static List<ClientTooltipComponent> updateTooltip(List<ClientTooltipComponent> tooltip, SlimefunRecipe recipe) {
         if (tooltip.isEmpty()) {
             return tooltip;
         }
 
         List<String> strings = tooltip.stream().map(component -> from(((TextTooltipAccessor) component).getText())).map(string -> fillPlaceholders(string, recipe)).toList();
-        List<TooltipComponent> newTooltip = new ArrayList<>();
-        strings.forEach(string -> newTooltip.add(TooltipComponent.of(Text.literal(string).asOrderedText())));
+        List<ClientTooltipComponent> newTooltip = new ArrayList<>();
+        strings.forEach(string -> newTooltip.add(ClientTooltipComponent.create(Component.literal(string).getVisualOrderText())));
         return newTooltip;
     }
 
-    private static String from(OrderedText text) {
+    private static String from(FormattedCharSequence text) {
         final StringBuilder builder = new StringBuilder();
         text.accept((index, style, c) -> {
             builder.appendCodePoint(c);

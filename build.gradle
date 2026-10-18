@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.18.2'
+    id 'net.fabricmc.fabric-loom' version '1.18.2'
 }
 
 version = project.mod_version
@@ -31,31 +31,37 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation "maven.modrinth:jade:${project.jade_version}"
+    implementation "maven.modrinth:jade:${project.jade_version}"
 
-    modImplementation("mezz.jei:jei-${project.jei_version}") {
+    implementation("mezz.jei:jei-${project.jei_version}") {
         exclude(group: "mezz.jei")
     }
 
-    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-runtime-fabric:${rei_version}") {
+    runtimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}")
+    compileOnly("me.shedaniel:RoughlyEnoughItems-runtime-fabric:${rei_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_version}")
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${rei_version}")
-    modCompileOnly("me.shedaniel.cloth:basic-math:${cloth_math_version}")
+    compileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_version}")
+    compileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${rei_version}")
+    compileOnly("dev.architectury:architectury-fabric:20.0.6")
+    compileOnly("me.shedaniel.cloth:basic-math:${cloth_math_version}")
 
-    modApi "com.terraformersmc:modmenu:${project.mod_menu_version}"
-    modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
+    implementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
+    implementation("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
     compileOnly "org.projectlombok:lombok:${project.lombok_version}"
     annotationProcessor "org.projectlombok:lombok:${project.lombok_version}"
+    testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.11.4"
+}
+
+test {
+    useJUnitPlatform()
 }
 
 sourceSets.main.java.exclude "me/justahuman/slimefun_essentials/compat/emi/**"
@@ -75,7 +81,7 @@ processResources {
     }
 }
 
-def targetJavaVersion = 21
+def targetJavaVersion = 25
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
@@ -96,7 +102,12 @@ java {
 }
 
 jar {
+    archiveFileName = "MonaSlimefunEssentials-26.1.2-fabric.jar"
     from("LICENSE") {
         rename { "${it}_${project.archives_base_name}" }
     }
+}
+
+tasks.named("sourcesJar") {
+    archiveFileName = "MonaSlimefunEssentials-26.1.2-fabric-sources.jar"
 }

@@ -1,22 +1,32 @@
 package me.justahuman.slimefun_essentials.client.payload;
 
+import com.google.common.io.ByteStreams;
 import me.justahuman.slimefun_essentials.api.DisplayComponentType;
 import me.justahuman.slimefun_essentials.utils.Payloads;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public class ComponentTypePayload implements CustomPayload {
-    private static final ComponentTypePayload EMPTY = new ComponentTypePayload();
-    public static final PacketCodec<PacketByteBuf, ComponentTypePayload> CODEC =
-            Payloads.newSplitCodec(input -> {
-                DisplayComponentType.deserialize(input);
-                Payloads.checkMetExpected();
-                return EMPTY;
-            }, EMPTY);
+public record ComponentTypePayload(byte[] data, String hash) implements SplitPayload {
+    private static final ComponentTypePayload EMPTY = new ComponentTypePayload(null, "");
+    public static final StreamCodec<FriendlyByteBuf, ComponentTypePayload> CODEC =
+            Payloads.newSplitCodec(ComponentTypePayload::new, EMPTY);
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public void apply() {
+        if (data == null) {
+            return;
+        }
+        var input = ByteStreams.newDataInput(data);
+        int dataVersion = input.readInt();
+        if (dataVersion < 1 || dataVersion > 2) {
+            throw new IllegalArgumentException("Unsupported component data version: " + dataVersion);
+        }
+        DisplayComponentType.deserialize(input);
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
         return Payloads.COMPONENT_TYPE_CHANNEL;
     }
 }
