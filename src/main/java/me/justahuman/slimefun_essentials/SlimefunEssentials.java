@@ -10,6 +10,7 @@ import me.justahuman.slimefun_essentials.client.payload.ItemsPayload;
 import me.justahuman.slimefun_essentials.client.payload.LoadingStatePayload;
 import me.justahuman.slimefun_essentials.client.payload.RecipeCategoriesPayload;
 import me.justahuman.slimefun_essentials.client.payload.RecipeDisplayPayload;
+import me.justahuman.slimefun_essentials.client.payload.SplitPayload;
 import me.justahuman.slimefun_essentials.compat.cloth_config.ConfigScreen;
 import me.justahuman.slimefun_essentials.config.ModConfig;
 import me.justahuman.slimefun_essentials.utils.Payloads;
@@ -42,11 +43,12 @@ public class SlimefunEssentials implements ClientModInitializer {
         PayloadTypeRegistry.serverboundPlay().register(Payloads.CACHE_STATUS_CHANNEL, CacheStatusPayload.CODEC);
         ModConfig.loadConfig();
 
-        ClientPlayNetworking.registerGlobalReceiver(Payloads.LOADING_STATE_CHANNEL, (payload, context) -> Payloads.expect(payload));
-        ClientPlayNetworking.registerGlobalReceiver(Payloads.ITEM_CHANNEL, (payload, context) -> {});
-        ClientPlayNetworking.registerGlobalReceiver(Payloads.COMPONENT_TYPE_CHANNEL, (payload, context) -> {});
-        ClientPlayNetworking.registerGlobalReceiver(Payloads.RECIPE_CATEGORIES_CHANNEL, (payload, context) -> {});
-        ClientPlayNetworking.registerGlobalReceiver(Payloads.RECIPE_DISPLAY_CHANNEL, (payload, context) -> {});
+        ClientPlayNetworking.registerGlobalReceiver(Payloads.LOADING_STATE_CHANNEL,
+                (payload, context) -> context.client().execute(() -> Payloads.expect(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(Payloads.ITEM_CHANNEL, SlimefunEssentials::receive);
+        ClientPlayNetworking.registerGlobalReceiver(Payloads.COMPONENT_TYPE_CHANNEL, SlimefunEssentials::receive);
+        ClientPlayNetworking.registerGlobalReceiver(Payloads.RECIPE_CATEGORIES_CHANNEL, SlimefunEssentials::receive);
+        ClientPlayNetworking.registerGlobalReceiver(Payloads.RECIPE_DISPLAY_CHANNEL, SlimefunEssentials::receive);
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             RecipeCategory.clear();
@@ -65,6 +67,10 @@ public class SlimefunEssentials implements ClientModInitializer {
                 }
             });
         }
+    }
+
+    private static <P extends SplitPayload> void receive(P payload, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> Payloads.accept(payload));
     }
 
     public static Identifier id(String path) {

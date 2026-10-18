@@ -13,6 +13,7 @@ import me.justahuman.slimefun_essentials.client.payload.ItemsPayload;
 import me.justahuman.slimefun_essentials.client.payload.LoadingStatePayload;
 import me.justahuman.slimefun_essentials.client.payload.RecipeCategoriesPayload;
 import me.justahuman.slimefun_essentials.client.payload.RecipeDisplayPayload;
+import me.justahuman.slimefun_essentials.client.payload.SplitPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
@@ -37,6 +38,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.zip.GZIPInputStream;
 
 public class Payloads {
@@ -56,6 +58,7 @@ public class Payloads {
     private static final int V2_MAGIC = 0x4D534532;
     private static final short V2_PROTOCOL = 2;
     private static final byte FLAG_GZIP = 1;
+    private static final String CHUNK_MARKER = "__mona_sync_chunk__";
     private static final int HASH_SIZE = 32;
     private static final int V2_HEADER_SIZE = Integer.BYTES + Short.BYTES + Byte.BYTES + Integer.BYTES * 5 + HASH_SIZE;
     private static final int MAX_UNCOMPRESSED_BYTES = 67_108_864;
@@ -65,7 +68,7 @@ public class Payloads {
     private static final long ASSEMBLY_TIMEOUT_NANOS = Duration.ofSeconds(30).toNanos();
     private static final Map<Class<?>, Integer> PACKET_COUNTS = new HashMap<>();
     private static final Map<Class<?>, Integer> EXPECTED_PACKETS = new HashMap<>();
-    private static final Map<Class<?>, Function<ByteArrayDataInput, ? extends CustomPacketPayload>> CACHE_DECODERS = new HashMap<>();
+    private static final Map<Class<?>, BiFunction<byte[], String, ? extends SplitPayload>> PAYLOAD_FACTORIES = new HashMap<>();
     private static final Map<Class<?>, Set<String>> CACHED_HASHES = new HashMap<>();
     private static Runnable onMeetExpected = showToast(RECEIVED_TOAST_TYPE);
     private static boolean metExpected = false;
@@ -163,13 +166,13 @@ public class Payloads {
         if (cached.size() != hashes.length) {
             return false;
         }
-        Function<ByteArrayDataInput, ? extends CustomPacketPayload> decoder = CACHE_DECODERS.get(payloadType);
-        if (decoder == null) {
+        BiFunction<byte[], String, ? extends SplitPayload> factory = PAYLOAD_FACTORIES.get(payloadType);
+        if (factory == null) {
             return false;
         }
         try {
-            for (byte[] raw : cached) {
-                decoder.apply(ByteStreams.newDataInput(raw));
+            for (int i = 0; i < cached.size(); i++) {
+                factory.apply(cached.get(i), hashes[i]).apply();
             }
             PACKET_COUNTS.put(payloadType, expectedPackets);
             CACHED_HASHES.put(payloadType, new HashSet<>(Arrays.asList(hashes)));
@@ -178,6 +181,20 @@ public class Payloads {
             SlimefunEssentials.LOGGER.warn("Could not restore cached {} data", payloadType.getSimpleName(), exception);
             return false;
         }
+    }
+
+    public static void accept(SplitPayload payload) {
+        if (payload.data() == null && !CHUNK_MARKER.equals(payload.hash())) {
+            return;
+        }
+        PACKET_COUNTS.merge(payload.getClass(), 1, Integer::sum);
+        if (payload.data() != null) {
+            if (payload.hash() != null && !payload.hash().isBlank()) {
+                SyncCache.store(payload.getClass(), payload.hash(), payload.data());
+            }
+            payload.apply();
+        }
+        checkMetExpected();
     }
 
     private static void sendCacheStatus(byte mask) {
@@ -209,8 +226,9 @@ public class Payloads {
         return new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(PLUGIN_ID, channel));
     }
 
-    public static <P extends CustomPacketPayload>StreamCodec<FriendlyByteBuf, P> newSplitCodec(Function<ByteArrayDataInput, P> decoder, P empty) {
-        CACHE_DECODERS.put(empty.getClass(), decoder);
+    public static <P extends SplitPayload> StreamCodec<FriendlyByteBuf, P> newSplitCodec(
+            BiFunction<byte[], String, P> factory, P empty) {
+        PAYLOAD_FACTORIES.put(empty.getClass(), factory);
         return new StreamCodec<>() {
             private final Map<Integer, Assembly> received = new HashMap<>();
 
@@ -223,16 +241,16 @@ public class Payloads {
                 buf.readBytes(bytes);
                 try {
                     if (bytes.length >= V2_HEADER_SIZE && ByteBuffer.wrap(bytes).getInt() == V2_MAGIC) {
-                        return decodeV2(bytes, decoder, empty);
+                        return decodeV2(bytes, factory, empty);
                     }
-                    return decodeLegacy(bytes, decoder, empty);
+                    return decodeLegacy(bytes, factory, empty);
                 } catch (RuntimeException exception) {
                     SlimefunEssentials.LOGGER.warn("Rejected invalid Mona Slimefun sync packet: {}", exception.getMessage());
                     return empty;
                 }
             }
 
-            private P decodeV2(byte[] bytes, Function<ByteArrayDataInput, P> decoder, P empty) {
+            private P decodeV2(byte[] bytes, BiFunction<byte[], String, P> factory, P empty) {
                 cleanupExpired();
                 ByteBuffer header = ByteBuffer.wrap(bytes);
                 header.getInt();
@@ -271,9 +289,8 @@ public class Payloads {
                     throw new IllegalArgumentException("chunk metadata mismatch");
                 }
                 assembly.put(piece, Arrays.copyOfRange(bytes, V2_HEADER_SIZE, bytes.length));
-                PACKET_COUNTS.merge(empty.getClass(), 1, Integer::sum);
                 if (!assembly.complete()) {
-                    return empty;
+                    return factory.apply(null, CHUNK_MARKER);
                 }
 
                 received.remove(id);
@@ -282,15 +299,13 @@ public class Payloads {
                 if (raw.length != rawLength || !MessageDigest.isEqual(sha256(raw), expectedHash)) {
                     throw new IllegalArgumentException("payload size or SHA-256 mismatch");
                 }
-                SyncCache.store(empty.getClass(), hashString, raw);
-                return decoder.apply(ByteStreams.newDataInput(raw));
+                return factory.apply(raw, hashString);
             }
 
-            private P decodeLegacy(byte[] bytes, Function<ByteArrayDataInput, P> decoder, P empty) {
+            private P decodeLegacy(byte[] bytes, BiFunction<byte[], String, P> factory, P empty) {
                 if (bytes.length < 12) {
                     throw new IllegalArgumentException("legacy packet is shorter than its header");
                 }
-                PACKET_COUNTS.merge(empty.getClass(), 1, Integer::sum);
                 ByteBuffer header = ByteBuffer.wrap(bytes);
                 int id = header.getInt();
                 int pieces = header.getInt();
@@ -307,10 +322,10 @@ public class Payloads {
                 }
                 assembly.put(piece, Arrays.copyOfRange(bytes, 12, bytes.length));
                 if (!assembly.complete()) {
-                    return empty;
+                    return factory.apply(null, CHUNK_MARKER);
                 }
                 received.remove(id);
-                return decoder.apply(ByteStreams.newDataInput(assembly.join()));
+                return factory.apply(assembly.join(), "");
             }
 
             private void cleanupExpired() {
