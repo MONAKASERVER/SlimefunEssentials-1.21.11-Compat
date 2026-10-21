@@ -74,16 +74,18 @@ public class RecipeCategory {
             final ItemStack itemStack = DataUtils.get(input, ItemStack.EMPTY);
             final Integer speed = DataUtils.get(input, (Integer) null);
             final Integer energy = DataUtils.get(input, (Integer) null);
-            final List<SlimefunRecipe> recipes = new ArrayList<>();
-
-            final RecipeCategory category = new RecipeCategory(id, itemStack, display, speed, energy, recipes);
+            final RecipeCategory existing = RECIPE_CATEGORIES.get(id);
+            final List<SlimefunRecipe> recipes = existing == null ? new ArrayList<>() : existing.childRecipes();
+            final RecipeCategory category = existing == null
+                    ? new RecipeCategory(id, itemStack, display, speed, energy, recipes)
+                    : existing;
             int size = input.readInt();
             for (int i = 0; i < size; i++) {
                 recipes.add(SlimefunRecipe.deserialize(category, input, energy, dataVersion));
             }
 
             TO_COPY.put(id, DataUtils.get(input, ""));
-            RECIPE_CATEGORIES.put(id, category);
+            RECIPE_CATEGORIES.putIfAbsent(id, category);
         } catch (Exception e) {
             SlimefunEssentials.LOGGER.error("Failed to deserialize recipe category: {}", id, e);
         }
@@ -94,9 +96,11 @@ public class RecipeCategory {
         final ItemStack itemStack = JsonUtils.deserializeItem(JsonUtils.get(categoryObject, "item", new JsonObject()));
         final Integer speed = JsonUtils.get(categoryObject, "speed", (Integer) null);
         final Integer energy = JsonUtils.get(categoryObject, "energy", (Integer) null);
-        final List<SlimefunRecipe> recipes = new ArrayList<>();
-
-        final RecipeCategory category = new RecipeCategory(id, itemStack, display, speed, energy, recipes);
+        final RecipeCategory existing = RECIPE_CATEGORIES.get(id);
+        final List<SlimefunRecipe> recipes = existing == null ? new ArrayList<>() : existing.childRecipes();
+        final RecipeCategory category = existing == null
+                ? new RecipeCategory(id, itemStack, display, speed, energy, recipes)
+                : existing;
         for (JsonElement recipeElement : JsonUtils.get(categoryObject, "recipes", new JsonArray())) {
             if (recipeElement instanceof JsonObject recipeObject) {
                 recipes.add(SlimefunRecipe.deserialize(category, recipeObject, energy));
@@ -104,7 +108,7 @@ public class RecipeCategory {
         }
 
         TO_COPY.put(id, JsonUtils.get(categoryObject, "copy", ""));
-        RECIPE_CATEGORIES.put(id, category);
+        RECIPE_CATEGORIES.putIfAbsent(id, category);
     }
 
     public static void finalizeCategories() {

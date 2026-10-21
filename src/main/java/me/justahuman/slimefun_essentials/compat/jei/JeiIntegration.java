@@ -18,6 +18,7 @@ import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.IRuntimeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
@@ -125,6 +126,19 @@ public class JeiIntegration implements IModPlugin {
 
         for (RecipeCategory recipeCategory : RecipeCategory.getRecipeCategories().values()) {
             registration.addCraftingStation(recipeType(recipeCategory), recipeCategory.itemStack());
+        }
+    }
+
+    @Override
+    public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
+        if (mustQueue || !Payloads.metExpected()) {
+            mustQueue = true;
+            return;
+        }
+        for (RecipeCategory recipeCategory : RecipeCategory.getRecipeCategories().values()) {
+            IRecipeType<SlimefunRecipe> type = recipeType(recipeCategory);
+            registration.addRecipeTransferHandler(
+                    new SlimefunRecipeTransferHandler(type, registration.getTransferHelper()), type);
         }
     }
 

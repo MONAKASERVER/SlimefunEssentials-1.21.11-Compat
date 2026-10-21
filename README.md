@@ -6,6 +6,8 @@ Minecraft 26.1.2 / Java 25向けのクライアントModです。対応サーバ
 
 - 同じMinecraftベースアイテムを使うSlimefunアイテムをSF IDで区別
 - JEI一覧、Rキーの製作方法、Uキーの使用用途
+- JEIの「＋」から、開いているドロッパー／ディスペンサーへ3×3レシピを安全に自動配置
+- SlimeTinker、FluffyMachines、DankTech2を含むアドオン独自RecipeTypeの同期
 - 3×3〜9×9の可変レシピ表示
 - v2通信のgzip、SHA-256、サイズ制限、破損拒否
 - 接続アドレスとサーバーUUIDごとのキャッシュ分離

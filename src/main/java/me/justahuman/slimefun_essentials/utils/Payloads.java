@@ -13,6 +13,7 @@ import me.justahuman.slimefun_essentials.client.payload.ItemsPayload;
 import me.justahuman.slimefun_essentials.client.payload.LoadingStatePayload;
 import me.justahuman.slimefun_essentials.client.payload.RecipeCategoriesPayload;
 import me.justahuman.slimefun_essentials.client.payload.RecipeDisplayPayload;
+import me.justahuman.slimefun_essentials.client.payload.RecipeTransferPayload;
 import me.justahuman.slimefun_essentials.client.payload.SplitPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -49,6 +50,7 @@ public class Payloads {
     public static final CustomPacketPayload.Type<RecipeCategoriesPayload> RECIPE_CATEGORIES_CHANNEL = newChannel("recipe_categories");
     public static final CustomPacketPayload.Type<LoadingStatePayload> LOADING_STATE_CHANNEL = newChannel("loading_state");
     public static final CustomPacketPayload.Type<CacheStatusPayload> CACHE_STATUS_CHANNEL = newChannel("cache_status");
+    public static final CustomPacketPayload.Type<RecipeTransferPayload> RECIPE_TRANSFER_CHANNEL = newChannel("recipe_transfer");
 
     private static final Type RECEIVING_TOAST_TYPE = new Type("receiving_expected_packets");
     private static final Type RECEIVED_TOAST_TYPE = new Type("received_expected_packets");

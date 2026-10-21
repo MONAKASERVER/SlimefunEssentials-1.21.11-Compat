@@ -10,6 +10,7 @@ import me.justahuman.slimefun_essentials.client.payload.ItemsPayload;
 import me.justahuman.slimefun_essentials.client.payload.LoadingStatePayload;
 import me.justahuman.slimefun_essentials.client.payload.RecipeCategoriesPayload;
 import me.justahuman.slimefun_essentials.client.payload.RecipeDisplayPayload;
+import me.justahuman.slimefun_essentials.client.payload.RecipeTransferPayload;
 import me.justahuman.slimefun_essentials.client.payload.SplitPayload;
 import me.justahuman.slimefun_essentials.compat.cloth_config.ConfigScreen;
 import me.justahuman.slimefun_essentials.config.ModConfig;
@@ -41,6 +42,7 @@ public class SlimefunEssentials implements ClientModInitializer {
         PayloadTypeRegistry.clientboundPlay().register(Payloads.RECIPE_CATEGORIES_CHANNEL, RecipeCategoriesPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(Payloads.RECIPE_DISPLAY_CHANNEL, RecipeDisplayPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(Payloads.CACHE_STATUS_CHANNEL, CacheStatusPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(Payloads.RECIPE_TRANSFER_CHANNEL, RecipeTransferPayload.CODEC);
         ModConfig.loadConfig();
 
         ClientPlayNetworking.registerGlobalReceiver(Payloads.LOADING_STATE_CHANNEL,
