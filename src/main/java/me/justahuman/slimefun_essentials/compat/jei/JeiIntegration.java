@@ -136,10 +136,19 @@ public class JeiIntegration implements IModPlugin {
             return;
         }
         for (RecipeCategory recipeCategory : RecipeCategory.getRecipeCategories().values()) {
+            if (recipeCategory.childRecipes().stream().noneMatch(JeiIntegration::fitsThreeByThree)) {
+                continue;
+            }
             IRecipeType<SlimefunRecipe> type = recipeType(recipeCategory);
             registration.addRecipeTransferHandler(
                     new SlimefunRecipeTransferHandler(type, registration.getTransferHelper()), type);
         }
+    }
+
+    private static boolean fitsThreeByThree(SlimefunRecipe recipe) {
+        int width = recipe.width() == null ? 3 : recipe.width();
+        int height = recipe.height() == null ? 3 : recipe.height();
+        return width <= 3 && height <= 3 && recipe.inputs().size() <= 9;
     }
 
     private static IRecipeType<SlimefunRecipe> recipeType(RecipeCategory recipeCategory) {

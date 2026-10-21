@@ -23,10 +23,10 @@ public class RecipeCategory {
     private static final Map<String, String> TO_COPY = new HashMap<>();
 
     private final String id;
-    private final ItemStack itemStack;
-    private final String display;
-    private final Integer speed;
-    private final Integer energy;
+    private ItemStack itemStack;
+    private String display;
+    private Integer speed;
+    private Integer energy;
     private final List<SlimefunRecipe> childRecipes;
     private SlimefunRecipe recipe = null;
 
@@ -79,6 +79,9 @@ public class RecipeCategory {
             final RecipeCategory category = existing == null
                     ? new RecipeCategory(id, itemStack, display, speed, energy, recipes)
                     : existing;
+            if (existing != null) {
+                existing.mergeMetadata(itemStack, display, speed, energy);
+            }
             int size = input.readInt();
             for (int i = 0; i < size; i++) {
                 recipes.add(SlimefunRecipe.deserialize(category, input, energy, dataVersion));
@@ -101,6 +104,9 @@ public class RecipeCategory {
         final RecipeCategory category = existing == null
                 ? new RecipeCategory(id, itemStack, display, speed, energy, recipes)
                 : existing;
+        if (existing != null) {
+            existing.mergeMetadata(itemStack, display, speed, energy);
+        }
         for (JsonElement recipeElement : JsonUtils.get(categoryObject, "recipes", new JsonArray())) {
             if (recipeElement instanceof JsonObject recipeObject) {
                 recipes.add(SlimefunRecipe.deserialize(category, recipeObject, energy));
@@ -163,6 +169,51 @@ public class RecipeCategory {
         } else {
             return 0;
         }
+    }
+
+    /**
+     * A recipe type may be exported by more than one addon packet. Keep the
+     * richest metadata instead of allowing packet order to downgrade a 6x6
+     * category to a generic or smaller grid.
+     */
+    private void mergeMetadata(ItemStack itemStack, String display, Integer speed, Integer energy) {
+        if (this.itemStack.isEmpty() && itemStack != null && !itemStack.isEmpty()) {
+            this.itemStack = itemStack;
+        }
+        if (displayPriority(display) > displayPriority(this.display)) {
+            this.display = display;
+        }
+        if (this.speed == null && speed != null) {
+            this.speed = speed;
+        }
+        if (this.energy == null && energy != null) {
+            this.energy = energy;
+        }
+    }
+
+    private static int displayPriority(String display) {
+        if (display == null || display.isBlank() || display.equals("none")) {
+            return 0;
+        }
+        if (display.equals("dynamic")) {
+            return 1;
+        }
+        if (display.startsWith("grid_")) {
+            int separator = display.indexOf('x', 5);
+            if (separator > 5) {
+                try {
+                    int width = Integer.parseInt(display.substring(5, separator));
+                    int height = Integer.parseInt(display.substring(separator + 1));
+                    return 100 + width * height;
+                } catch (NumberFormatException ignored) {
+                    // Keep a stable priority for an unknown grid spelling.
+                }
+            }
+        }
+        if (display.equals("grid3")) {
+            return 109;
+        }
+        return 10;
     }
 
     public static RecipeCategory fromId(String component) {
