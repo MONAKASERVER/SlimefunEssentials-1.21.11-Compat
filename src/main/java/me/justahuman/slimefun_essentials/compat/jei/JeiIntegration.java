@@ -98,8 +98,10 @@ public class JeiIntegration implements IModPlugin {
 
         IJeiHelpers jeiHelpers = registration.getJeiHelpers();
         IGuiHelper guiHelper = jeiHelpers.getGuiHelper();
+        CATEGORIES.clear();
         for (RecipeCategory recipeCategory : RecipeCategory.getRecipeCategories().values()) {
-            SlimefunJeiCategory category = new SlimefunJeiCategory(guiHelper, recipeCategory);
+            SlimefunJeiCategory category = new SlimefunJeiCategory(
+                    guiHelper, recipeCategory, recipeType(recipeCategory));
             registration.addRecipeCategories(category);
             CATEGORIES.add(category);
         }
@@ -154,7 +156,9 @@ public class JeiIntegration implements IModPlugin {
     }
 
     private static IRecipeType<SlimefunRecipe> recipeType(RecipeCategory recipeCategory) {
-        return IRecipeType.create(SlimefunEssentials.id(recipeCategory.id()), SlimefunRecipe.class);
+        String path = RecipeTypeIds.pathFor(
+                recipeCategory.id(), RecipeCategory.getRecipeCategories().keySet());
+        return IRecipeType.create(SlimefunEssentials.id(path), SlimefunRecipe.class);
     }
 
     @Override

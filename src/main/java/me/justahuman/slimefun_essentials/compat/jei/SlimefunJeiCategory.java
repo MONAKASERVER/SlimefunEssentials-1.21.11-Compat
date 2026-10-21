@@ -1,6 +1,5 @@
 package me.justahuman.slimefun_essentials.compat.jei;
 
-import me.justahuman.slimefun_essentials.SlimefunEssentials;
 import me.justahuman.slimefun_essentials.api.def.DrawMode;
 import me.justahuman.slimefun_essentials.client.RecipeCategory;
 import me.justahuman.slimefun_essentials.client.component.RecipeDisplayComponent;
@@ -20,13 +19,16 @@ import org.jetbrains.annotations.NotNull;
 public class SlimefunJeiCategory implements IRecipeCategory<SlimefunRecipe> {
     protected final IGuiHelper guiHelper;
     protected final RecipeCategory recipeCategory;
+    protected final IRecipeType<SlimefunRecipe> recipeType;
     protected IDrawable icon;
     protected final int width;
     protected final int height;
 
-    public SlimefunJeiCategory(IGuiHelper guiHelper, RecipeCategory recipeCategory) {
+    public SlimefunJeiCategory(IGuiHelper guiHelper, RecipeCategory recipeCategory,
+                               IRecipeType<SlimefunRecipe> recipeType) {
         this.guiHelper = guiHelper;
         this.recipeCategory = recipeCategory;
+        this.recipeType = recipeType;
         this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, this.recipeCategory.itemStack());
         int width = 0;
         int height = 0;
@@ -40,7 +42,7 @@ public class SlimefunJeiCategory implements IRecipeCategory<SlimefunRecipe> {
 
     @Override
     public @NotNull IRecipeType<SlimefunRecipe> getRecipeType() {
-        return IRecipeType.create(SlimefunEssentials.id(this.recipeCategory.id()), SlimefunRecipe.class);
+        return this.recipeType;
     }
 
     @Override
