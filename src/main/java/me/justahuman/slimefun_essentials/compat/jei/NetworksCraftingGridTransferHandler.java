@@ -13,15 +13,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 /** Adds JEI's + button to the 3x3 crafting area inside Networks' 6-row grid GUI. */
 public final class NetworksCraftingGridTransferHandler implements IRecipeTransferHandler<ChestMenu, SlimefunRecipe> {
-    private static final int CRAFT_BUTTON_SLOT = 34;
-
     private final IRecipeType<SlimefunRecipe> recipeType;
     private final IRecipeTransferHandlerHelper helper;
 
@@ -53,10 +50,6 @@ public final class NetworksCraftingGridTransferHandler implements IRecipeTransfe
                                                           Player player,
                                                           boolean maxTransfer,
                                                           boolean doTransfer) {
-        if (container.slots.size() <= CRAFT_BUTTON_SLOT
-                || !container.getSlot(CRAFT_BUTTON_SLOT).getItem().is(Items.CRAFTING_TABLE)) {
-            return helper.createUserErrorWithTooltip(Component.literal("Networks Crafting Gridを開いてください"));
-        }
         int width = recipe.width() == null ? 3 : recipe.width();
         int height = recipe.height() == null ? 3 : recipe.height();
         if (width > 3 || height > 3 || recipe.inputs().size() > 9) {
