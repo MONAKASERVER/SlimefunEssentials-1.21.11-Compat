@@ -142,6 +142,8 @@ public class JeiIntegration implements IModPlugin {
             IRecipeType<SlimefunRecipe> type = recipeType(recipeCategory);
             registration.addRecipeTransferHandler(
                     new SlimefunRecipeTransferHandler(type, registration.getTransferHelper()), type);
+            registration.addRecipeTransferHandler(
+                    new NetworksCraftingGridTransferHandler(type, registration.getTransferHelper()), type);
         }
     }
 
